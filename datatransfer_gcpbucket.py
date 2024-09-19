@@ -19,17 +19,27 @@ def upload_to_gcs(bucket_name, local_folder):
         
         # Check if it's a file and not a directory
         if os.path.isfile(local_file_path):
-            destination_blob_name = local_file  # Only use the file name, no folders
+            # Exclude '2023_validation_metadata.json' and '2023_validation_metadata.csv' from renaming
+            if local_file in ['2023_validation_metadata.jsonl', '2023_validation_metadata.csv']:
+                destination_blob_name = local_file
+            else:
+                # Remove '2023_validation_' prefix if present
+                if local_file.startswith('2023_validation_'):
+                    destination_blob_name = local_file[len('2023_validation_'):]
+                else:
+                    destination_blob_name = local_file  # Keep the original filename if prefix not present
+
             blob = bucket.blob(destination_blob_name)
             
             # Check if the blob already exists in GCS
             if not blob.exists():
                 # Upload the file
                 blob.upload_from_filename(local_file_path)
-                print(f"Uploaded {local_file} to {destination_blob_name} in bucket {bucket_name}.")
+                print(f"Uploaded {local_file} as {destination_blob_name} in bucket {bucket_name}.")
             else:
                 print(f"File {destination_blob_name} already exists in the bucket. Skipping upload.")
 
+    print("All files have been processed.")
 
 # Specify your bucket name and local folder path
 upload_to_gcs('gaia_files', 'GAIA_data')
