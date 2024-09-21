@@ -42,4 +42,4 @@ def upload_to_gcs(bucket_name, local_folder):
     print("All files have been processed.")
 
 # Specify your bucket name and local folder path
-upload_to_gcs('gaia_files', 'GAIA_data')
+upload_to_gcs('gaia_files', 'GAIA/2023/validation')
