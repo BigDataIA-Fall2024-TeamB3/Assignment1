@@ -16,7 +16,7 @@ DB_HOST = os.getenv('DB_HOST')
 DB_PORT = os.getenv('DB_PORT', '5432')
 
 # CSV file path
-CSV_FILE_PATH = 'GAIA_data/2023_validation_metadata.csv'
+CSV_FILE_PATH = 'GAIA/2023/validation/metadata.csv'
 
 # Create the database connection URL
 DATABASE_URL = f'postgresql+psycopg2://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'

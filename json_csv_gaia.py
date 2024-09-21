@@ -26,8 +26,8 @@ def convert_jsonl_to_csv(jsonl_file, csv_file):
     print(f"Converted {jsonl_file} to {csv_file}.")
 
 # File paths
-jsonl_file = os.path.join('GAIA_data', '2023_validation_metadata.jsonl')
-csv_file = os.path.join('GAIA_data', '2023_validation_metadata.csv')
+jsonl_file = os.path.join('GAIA/2023/validation', 'metadata.jsonl')
+csv_file = os.path.join('GAIA/2023/validation', 'metadata.csv')
 
 # Convert the JSONL file to CSV
 convert_jsonl_to_csv(jsonl_file, csv_file)
