@@ -1,6 +1,25 @@
 import json
 import csv
 import os
+from google.cloud import storage
+
+def download_blob(bucket_name, source_blob_name, destination_file_name):
+    """Downloads a blob from the bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(source_blob_name)
+    blob.download_to_filename(destination_file_name)
+
+    print(f"Blob {source_blob_name} downloaded to {destination_file_name}.")
+
+def upload_blob(bucket_name, source_file_name, destination_blob_name):
+    """Uploads a file to the bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(source_file_name)
+
+    print(f"File {source_file_name} uploaded to {destination_blob_name}.")
 
 def convert_jsonl_to_csv(jsonl_file, csv_file):
     """Reads a JSONL file and converts it to a CSV file."""
@@ -25,9 +44,26 @@ def convert_jsonl_to_csv(jsonl_file, csv_file):
     
     print(f"Converted {jsonl_file} to {csv_file}.")
 
-# File paths
-jsonl_file = os.path.join('GAIA/2023/validation', 'metadata.jsonl')
-csv_file = os.path.join('GAIA/2023/validation', 'metadata.csv')
+def process_jsonl_to_csv_in_gcs(bucket_name, jsonl_blob_path, csv_blob_path):
+    """Downloads JSONL file from GCS, converts it to CSV, and uploads CSV back to GCS."""
+    
+    # Temporary file paths for local storage
+    temp_jsonl_file = '/tmp/temp_metadata.jsonl'
+    temp_csv_file = '/tmp/temp_metadata.csv'
+    
+    # Step 1: Download the JSONL file from GCS to a local temporary file
+    download_blob(bucket_name, jsonl_blob_path, temp_jsonl_file)
+    
+    # Step 2: Convert the JSONL file to CSV
+    convert_jsonl_to_csv(temp_jsonl_file, temp_csv_file)
+    
+    # Step 3: Upload the CSV file back to GCS
+    upload_blob(bucket_name, temp_csv_file, csv_blob_path)
 
-# Convert the JSONL file to CSV
-convert_jsonl_to_csv(jsonl_file, csv_file)
+# Set the GCS bucket and file paths
+bucket_name = 'gaia_files'
+jsonl_blob_path = 'metadata.jsonl'  # Path to JSONL in GCS
+csv_blob_path = 'metadata.csv'      # Path where CSV will be saved in GCS
+
+# Process JSONL to CSV in GCS
+process_jsonl_to_csv_in_gcs(bucket_name, jsonl_blob_path, csv_blob_path)
