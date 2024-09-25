@@ -5,7 +5,7 @@ altair==5.4.1
 annotated-types==0.7.0
 anyio==4.4.0
 attrs==24.2.0
-bio==1.7.1
+bio
 biopython==1.84
 biothings-client==0.3.1
 blinker==1.8.2
