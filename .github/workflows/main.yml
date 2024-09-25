@@ -28,27 +28,23 @@ jobs:
         pip install -r requirements.txt
         pip install google-cloud-storage
 
-    # Step 4: Set environment variables and write Google credentials to file
-    - name: Print Google Credentials JSON
-      run:  echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
-            cat ${{ github.workspace }}/google_credentials.json
-      
+    # Step 4: Print the GOOGLE_APPLICATION_CREDENTIALS directly from secrets (for debugging)
+    - name: Print GOOGLE_APPLICATION_CREDENTIALS
+      run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+
+    # Step 5: Write Google credentials to a file
     - name: Set environment variables
       run: |
         echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > ${{ github.workspace }}/google_credentials.json
         export GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/google_credentials.json
 
-    # Step 5: Print the content of the google_credentials.json file to verify its format
-    - name: Print Google Credentials JSON
-      run: cat ${{ github.workspace }}/google_credentials.json
-
     # Step 6: Validate the JSON format using python
     - name: Validate Google Credentials JSON Format
       run: |
         python -m json.tool < ${{ github.workspace }}/google_credentials.json
-      continue-on-error: true  # This ensures the job doesn't fail due to formatting issues
+      continue-on-error: true
 
-    # Step 7: Run the Python script (only if the JSON is valid)
+    # Step 7: Run the Python script
     - name: Run json_csv_gaia.py
       run: python3 data_handle/json_csv_gaia.py
       env:
