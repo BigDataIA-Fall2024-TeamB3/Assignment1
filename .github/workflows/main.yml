@@ -29,6 +29,10 @@ jobs:
         pip install google-cloud-storage
 
     # Step 4: Set environment variables and write Google credentials to file
+    - name: Print Google Credentials JSON
+      run:  echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+            cat ${{ github.workspace }}/google_credentials.json
+      
     - name: Set environment variables
       run: |
         echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > ${{ github.workspace }}/google_credentials.json
