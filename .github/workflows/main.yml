@@ -48,3 +48,5 @@ jobs:
     # Step 5: Run the Python script
     - name: Run json_csv_gaia.py
       run: python3 data_handle/json_csv_gaia.py
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/google_credentials.json
