@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 import psycopg2
-from psycopg2 import sql
 import os
 from dotenv import load_dotenv
 
@@ -59,12 +58,12 @@ def create_results_table():
                 conn.commit()
                 print("Table 'gaia_benchmark_results' created or already exists.")
         except Exception as e:
-            print(f"Error creating table gaia_benchmark_results: {e}")  # Use print instead of st.error
+            print(f"Error creating table gaia_benchmark_results: {e}")
         finally:
             conn.close()
             print("Database connection closed after table creation.")
     else:
-        print("Failed to connect to the database for table creation.")  # Use print instead of st.error
+        print("Failed to connect to the database for table creation.")
 
 create_results_table()
 
@@ -86,18 +85,15 @@ def insert_result(question, expected_answer, generated_response, result):
             with conn.cursor() as cur:
                 cur.execute(insert_query, (question, expected_answer, generated_response, result))
                 conn.commit()
-                print("Data inserted successfully.")
+                st.session_state.result_recorded = True  # Set flag to indicate that a result has been recorded
                 print("Data inserted successfully into 'gaia_benchmark_results'.")
         except Exception as e:
             st.error(f"Error inserting data: {e}")
-            print(f"Error inserting data: {e}")
         finally:
             conn.close()
             print("Database connection closed after data insertion.")
     else:
         st.error("Failed to connect to the database.")
-        print("Failed to connect to the database for data insertion.")
-
 
 # Function to load validation data into a Pandas DataFrame
 def load_validation_data():
@@ -111,9 +107,8 @@ def load_validation_data():
         except Exception as e:
             st.error(f"Error loading data: {e}")
             conn.close()  # Close the connection on error
-            print(f"Error loading data: {e}")
     else:
-        print("Failed to connect to the database for loading validation data.")
+        st.warning("Failed to connect to the database for loading validation data.")
     return None
 
 # Function to get the answer from OpenAI API using the chat format
@@ -129,7 +124,6 @@ def get_openai_chat_response(messages):
         return message_content
     except Exception as e:
         st.error(f"Error fetching response from OpenAI: {e}")
-        print(f"Error fetching response from OpenAI: {e}")
         return None
 
 # Function to reset session state for a new question
@@ -137,6 +131,7 @@ def reset_session_state():
     st.session_state.openai_response = None
     st.session_state.show_metadata = False
     st.session_state.cot_response = None
+    st.session_state.result_recorded = False  # Reset the result recorded flag
 
 # Function to initialize session state variables
 def initialize_session_state():
@@ -148,6 +143,10 @@ def initialize_session_state():
         st.session_state.cot_response = None
     if 'selected_question' not in st.session_state:
         st.session_state.selected_question = None
+    if 'selected_level' not in st.session_state:
+        st.session_state.selected_level = "All"  # Default to show all levels
+    if 'result_recorded' not in st.session_state:
+        st.session_state.result_recorded = False  # Flag to track if a result has been recorded
 
 # Function to display the Validation Tool tab
 def show():
@@ -177,12 +176,24 @@ def show():
     data = load_validation_data()
 
     if data is not None:
+        # Add a level filter dropdown
+        levels = ["All"] + data['level'].unique().tolist()  # Add "All" as an option to show all levels
+        selected_level = st.selectbox("Select Level", levels, index=levels.index(st.session_state.selected_level))
+        
+        # Update session state with the selected level
+        st.session_state.selected_level = selected_level
+
+        # Filter data based on selected level
+        if selected_level != "All":
+            filtered_data = data[data['level'] == selected_level]
+        else:
+            filtered_data = data
 
         # Dropdown box for selecting a validation prompt (question)
-        questions = data['question'].tolist()
+        questions = filtered_data['question'].tolist()
 
         # Check if a question is already selected in the session state
-        if st.session_state.selected_question is None:
+        if st.session_state.selected_question not in questions:
             st.session_state.selected_question = questions[0]
 
         # Display the dropdown and update the selected question
@@ -194,7 +205,7 @@ def show():
             reset_session_state()
 
         # Filter the selected question's data
-        question_data = data[data['question'] == selected_question].iloc[0]
+        question_data = filtered_data[filtered_data['question'] == selected_question].iloc[0]
         question = question_data['question']
         expected_answer = question_data['final_answer']  # Use final_answer as the expected answer
 
@@ -211,78 +222,84 @@ def show():
         source_text = question_data['source_text']
         if pd.notna(file_name) and pd.notna(source_text):
             st.subheader("📄 Source Context")
-            st.text_area("Source Text", value=source_text, height=150, help="Context extracted from the source document.")
+            st.markdown(f"```\n{source_text}\n```")  # Display source text as non-editable
 
-        # Step 1: Button to ask OpenAI with the question and optionally the source text
-        if st.session_state.openai_response is None:
-            if st.button("Ask OpenAI 🚀"):
-                with st.spinner("Fetching response from OpenAI..."):
-                    # Create messages with or without source text
-                    regular_messages = [
-                        {"role": "system", "content": "You are a helpful assistant. Only give me the final answer without any explanation and description."}
-                    ]
-                    if pd.notna(source_text):
-                        # Include source text if available
-                        regular_messages.append({"role": "user", "content": f"Question: {selected_question}\n\nSource Context: {source_text}"})
-                    else:
-                        # Just include the question
-                        regular_messages.append({"role": "user", "content": selected_question})
-                    
-                    st.session_state.openai_response = get_openai_chat_response(regular_messages)
-        
-        # Step 2: Display OpenAI response if available
-        if st.session_state.openai_response and not st.session_state.cot_response:
-            st.subheader("🤖 OpenAI Response")
-            st.write(st.session_state.openai_response)
+        # Check if a result has already been recorded
+        if not st.session_state.result_recorded:
+            # Step 1: Button to ask OpenAI with the question and optionally the source text
+            if st.session_state.openai_response is None:
+                if st.button("Ask OpenAI 🚀"):
+                    with st.spinner("Fetching response from OpenAI..."):
+                        # Create messages with or without source text
+                        regular_messages = [
+                            {"role": "system", "content": "You are a helpful assistant. Only give me the final answer without any explanation and description."}
+                        ]
+                        if pd.notna(source_text):
+                            # Include source text if available
+                            regular_messages.append({"role": "user", "content": f"Question: {selected_question}\n\nSource Context: {source_text}"})
+                        else:
+                            # Just include the question
+                            regular_messages.append({"role": "user", "content": selected_question})
+                        
+                        st.session_state.openai_response = get_openai_chat_response(regular_messages)
+            
+            # Step 2: Display OpenAI response if available
+            if st.session_state.openai_response and not st.session_state.cot_response:
+                st.subheader("🤖 OpenAI Response")
+                st.write(st.session_state.openai_response)
 
-            # Show only the "ASIS" button after first OpenAI response
-            if st.button("Record Response as 'ASIS' 📝"):
-                # Insert the result with "ASIS"
-                insert_result(question, expected_answer, st.session_state.openai_response, "ASIS")
-                st.success("Response recorded as 'ASIS'.")
+                # Show only the "ASIS" button if not showing metadata
+                if not st.session_state.show_metadata:
+                    if st.button("Record Response as 'ASIS' 📝"):
+                        # Insert the result with "ASIS"
+                        insert_result(question, expected_answer, st.session_state.openai_response, "ASIS")
+                        st.success("Response recorded as 'ASIS'.")
 
-            # Show the button to ask with Chain of Thought
-            if st.button("Ask with Chain of Thought 🔗"):
-                st.session_state.show_metadata = True
+                # Show the button to ask with Chain of Thought if not already showing metadata
+                if not st.session_state.show_metadata and st.button("Ask with Chain of Thought 🔗"):
+                    st.session_state.show_metadata = True
 
-        # Step 3: Show the editable text area for annotator metadata and CoT response
-        if st.session_state.show_metadata:
-            annotator_metadata = question_data['annotator_metadata']
-            annotator_metadata_input = st.text_area("Annotator Metadata (Chain of Thought)", value=annotator_metadata, height=150, help="Provide additional context or logic to guide the AI's response.")
+            # Step 3: Show the editable text area for annotator metadata and CoT response
+            if st.session_state.show_metadata:
+                annotator_metadata = question_data['annotator_metadata']
+                annotator_metadata_input = st.text_area("Annotator Metadata (Chain of Thought)", value=annotator_metadata, height=150, help="Provide additional context or logic to guide the AI's response.")
 
-            # Step 4: Button to send with CoT
-            if st.button("Send with Chain of Thought to OpenAI ✨"):
-                with st.spinner("Fetching response with Chain of Thought..."):
-                    cot_messages = [
-                        {"role": "system", "content": "You are a helpful assistant. Only give me the final answer without any explanation and description."},
-                    ]
+                # Step 4: Button to send with CoT
+                if st.button("Send with Chain of Thought to OpenAI ✨"):
+                    with st.spinner("Fetching response with Chain of Thought..."):
+                        cot_messages = [
+                            {"role": "system", "content": "You are a helpful assistant. Only give me the final answer without any explanation and description."},
+                        ]
 
-                    # Check if source text is available and append it to the Chain of Thought prompt
-                    if pd.notna(source_text):
-                        cot_messages.append(
-                            {"role": "user", "content": f"Question: {selected_question}\n\nSource Context: {source_text}\n\nChain of Thought: {annotator_metadata_input}"}
-                        )
-                    else:
-                        cot_messages.append(
-                            {"role": "user", "content": f"Question: {selected_question}\n\nChain of Thought: {annotator_metadata_input}"}
-                        )
+                        # Check if source text is available and append it to the Chain of Thought prompt
+                        if pd.notna(source_text):
+                            cot_messages.append(
+                                {"role": "user", "content": f"Question: {selected_question}\n\nSource Context: {source_text}\n\nChain of Thought: {annotator_metadata_input}"}
+                            )
+                        else:
+                            cot_messages.append(
+                                {"role": "user", "content": f"Question: {selected_question}\n\nChain of Thought: {annotator_metadata_input}"}
+                            )
 
-                    st.session_state.cot_response = get_openai_chat_response(cot_messages)
-        
-        # Step 5: Display CoT response if available
-        if st.session_state.cot_response:
-            st.subheader("🧠 OpenAI Response with Chain of Thought")
-            st.write(st.session_state.cot_response)
+                        st.session_state.cot_response = get_openai_chat_response(cot_messages)
+            
+            # Step 5: Display CoT response if available
+            if st.session_state.cot_response:
+                st.subheader("🧠 OpenAI Response with Chain of Thought")
+                st.write(st.session_state.cot_response)
 
-            # Show "With Instructions" and "Unable to Answer" buttons
-            col1, col2 = st.columns(2)
-            if col1.button("Record as 'With Instructions' ✅"):
-                insert_result(question, expected_answer, st.session_state.cot_response, "With Instructions")
-                st.success("Response recorded as 'With Instructions'.")
+                # Show "With Instructions" and "Unable to Answer" buttons
+                col1, col2 = st.columns(2)
+                if col1.button("Record as 'With Instructions' ✅"):
+                    insert_result(question, expected_answer, st.session_state.cot_response, "With Instructions")
+                    st.success("Response recorded as 'With Instructions'.")
 
-            if col2.button("Record as 'Unable to Answer' ❌"):
-                insert_result(question, expected_answer, st.session_state.cot_response, "Unable to Answer")
-                st.success("Response recorded as 'Unable to Answer'.")
+                if col2.button("Record as 'Unable to Answer' ❌"):
+                    insert_result(question, expected_answer, st.session_state.cot_response, "Unable to Answer")
+                    st.success("Response recorded as 'Unable to Answer'.")
+        else:
+            # Message to indicate result has been recorded
+            st.info("Result recorded. Please select a new question to continue.")
     else:
         st.warning("No data available in the database. Please ensure the data is correctly loaded.")
 
