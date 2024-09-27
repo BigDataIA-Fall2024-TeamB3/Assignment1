@@ -67,35 +67,26 @@ The GAIA Benchmark LLM Evaluation Tool integrates several components, including 
 
 ## Project Tree:
 ```
-.
-├── GAIA
-│   ├── 2023
-│   ├── GAIA.py
-│   └── README.md
-├── GAIA_Benchmark_app
-│   ├── GAIA_Benchmark_LLM.py
-│   ├── pages
-│   └── requirements.txt
+Assignment1/
+├── .devcontainer/
+│   └── devcontainer.json
+├── GAIA_Benchmark_app/
+│   ├── pages/
+│   ├── GAIA_Benchmark_LLM.py
+│   └── requirements.txt
+├── data_handle/
+│   ├── datatransfer_gcpbucket.py
+│   ├── datatransfer_gcpsql.py
+│   ├── json_csv_gaia.py
+│   ├── main_data_transfer.py
+│   └── source_text_extract.py
+├── terraform_IaC/
+│   ├── main.tf
+│   └── variables.tf
+├── .DS_Store
+├── .gitignore
 ├── README.md
-├── bigdata-8989-caf46d240143.json
-├── data_handle
-│   ├── datatransfer_gcpbucket.py
-│   ├── datatransfer_gcpsql.py
-│   ├── json_csv_gaia.py
-│   ├── main_data_transfer.py
-│   └── source_text_extract.py
-├── requirements.txt
-├── terraform_IaC
-│   ├── main.tf
-│   └── variables.tf
-└── venv
-    ├── bin
-    ├── docx-template
-    ├── etc
-    ├── include
-    ├── lib
-    ├── pyvenv.cfg
-    └── share
+└── requirements.txt
 ```
 
 
