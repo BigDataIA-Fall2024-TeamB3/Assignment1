@@ -224,6 +224,17 @@ def extract_text_from_pdb(file_path):
     return pdb_text
 
 
+import tempfile
+import os
+from google.cloud import storage
+import pandas as pd
+import psycopg2
+from psycopg2 import sql
+from dotenv import load_dotenv
+
+# Define your extraction functions here (e.g., extract_text_from_pdf, etc.)
+# (Omitting function definitions for brevity, include them as defined earlier)
+
 # Mapping extensions to their respective extraction functions
 extract_functions = {
     ".pdf": extract_text_from_pdf,
@@ -256,6 +267,9 @@ db_port = os.getenv("DB_PORT")
 db_name = os.getenv("DB_NAME")
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
+
+# GCP bucket name configuration
+BUCKET_NAME = 'gaia_files'
 
 # Function to connect to the Cloud SQL PostgreSQL instance using psycopg2
 def connect_to_db():
@@ -324,6 +338,37 @@ def update_table_with_source_text(conn, df, table_name):
     except Exception as e:
         print(f"Error updating table: {e}")
 
+# Function to download all files from GCP bucket to a specific local directory
+def download_files_to_directory(bucket_name, local_directory):
+    try:
+        # Initialize the Google Cloud Storage client
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        
+        # Create local directory if it doesn't exist
+        if not os.path.exists(local_directory):
+            os.makedirs(local_directory)
+            print(f"Directory '{local_directory}' created.")
+        
+        # List all files in the bucket
+        blobs = bucket.list_blobs()
+        
+        # Iterate through the files and download each one
+        for blob in blobs:
+            # Skip if it is a directory (e.g., if the name ends with a slash)
+            if blob.name.endswith("/"):
+                continue
+            
+            # Construct the local file path
+            local_file_path = os.path.join(local_directory, os.path.basename(blob.name))
+            
+            # Download the file
+            blob.download_to_filename(local_file_path)
+            print(f"Downloaded {blob.name} to {local_file_path}")
+    
+    except Exception as e:
+        print(f"Error downloading files from GCS: {e}")
+
 # Function to extract text from a given directory of files (already defined by you)
 def extract_text_from_directory(directory_path):
     # Files to ignore
@@ -349,25 +394,31 @@ def extract_text_from_directory(directory_path):
     return pd.DataFrame(list(extracted_texts.items()), columns=['File_name', 'Extracted Text'])
 
 # Main workflow function
-def main_workflow(directory_path, table_name):
-    # Connect to the database
+def main_workflow(bucket_name, table_name):
+    # Define the local directory for downloading files
+    local_dir = '/tmp/validation'  # Local path for downloaded files
+
+    # Step 1: Download files from GCP bucket to the local directory
+    download_files_to_directory(bucket_name, local_dir)
+
+    # Step 2: Connect to the database
     conn = connect_to_db()
     if not conn:
         print("Failed to connect to the database.")
         return
 
-    # Step 1: Add the 'source_text' column to the table
+    # Step 3: Add the 'source_text' column to the table
     add_column_to_table(conn, table_name, "source_text", "TEXT")
 
-    # Step 2: Extract text from files in the specified directory
-    df_extracted_texts = extract_text_from_directory(directory_path)
+    # Step 4: Extract text from files in the local directory
+    df_extracted_texts = extract_text_from_directory(local_dir)
     
     # Check if DataFrame is not empty
     if df_extracted_texts.empty:
         print("No valid files found for extraction.")
         return
 
-    # Step 3: Update the table with the extracted text
+    # Step 5: Update the table with the extracted text
     update_table_with_source_text(conn, df_extracted_texts, table_name)
 
     # Close the connection
@@ -375,7 +426,5 @@ def main_workflow(directory_path, table_name):
 
 # Example usage
 if __name__ == "__main__":
-    directory_path = 'GAIA/2023/validation'  # Path to the directory containing files
     table_name = 'validation'  # Replace with your actual table name
-    
-    main_workflow(directory_path, table_name)
+    main_workflow(BUCKET_NAME, table_name)
