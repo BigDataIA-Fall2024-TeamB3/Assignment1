@@ -23,51 +23,72 @@ The problem revolves around developing a seamless, efficient, and user-focused e
 ### Scope:
 The evaluation tool should be capable of handling large datasets and automating data transfer processes, specifically from Hugging Face to a Google Cloud Platform (GCP) environment. Streamlit will serve as the primary user interface, allowing users to select test cases, compare outputs with ground truth data, and modify metadata annotations. This interaction will facilitate iterative evaluations, helping improve the accuracy and efficiency of AI models while providing clear, actionable insights through detailed reports and visualizations.
 
-### Features:
+### Outcomes:
 The solution will not only streamline the process of test case selection and comparison but also ensure seamless data integration. This will enable users to refine and process data more effectively, capturing and visualizing feedback accurately. By incorporating visual reports, the tool provides a comprehensive understanding of model performance.
 
-## Process Outline:
+## Application Workflow:
+The GAIA Benchmark LLM Evaluation Tool integrates several components, including data preprocessing, infrastructure setup using Terraform, and a multi-page Streamlit application. The workflow is organized into multiple steps:
 
-**1.Data Integration**: Automate the process of extracting data from Hugging Face and transferring it to a GCP bucket. This data is then made available in a VS Code environment for further processing within the Streamlit application.
+**1.Infrastructure Setup Using Terraform**:
+  Cloud SQL Setup: Terraform is used to automate the setup of a PostgreSQL instance in Google Cloud SQL. This involves defining necessary resources and optimizing settings for performance and cost.
+  
+  Google Cloud Storage (GCS) Setup: Creates a GCS bucket using Terraform for storing datasets and configuration files.
 
-**2.Data Quality**: Apply validation checks during data transfer to ensure data integrity and consistency, with an emphasis on schema validation and error handling.
+**2.Data Handling and Preprocessing**:
+  JSON to CSV Conversion: Converts Metadata in GCloud Bucket from a JSON format to CSV to simplify data ingestion. This ensures integrity and consistency during the data transformation process.
+  
+  Data Transfer from Bucket to GCP Cloud SQL: Uses Python libraries (e.g., psycopg2) to connect and upload the Metadata CSV data to Cloud SQL. It includes error handling to manage issues during the connection and upload processes.
 
-**3.Model Evaluation**: Leverage the OpenAI API within the Streamlit app to produce responses for selected test cases from the GAIA dataset. Users can refine queries and update annotations based on the model's performance.
+  Data Handling for Context of Prompts: After creating a metadata table in GCloud SQL, we select the files related to prompts (context) from the bucket and process them into text, add them as a new column in our table.
 
-**4.Feedback and Reporting**: Develop a module to capture user feedback and produce comprehensive visual reports, providing insights into model performance and highlighting areas for enhancement.
+**3.Streamlit Application Pages**:
+  GAIA LLM Validation Tool: Provides an interactive UI for users to select test cases, generate model responses, and provide feedback. It enables users to refine and re-evaluate model outputs.
+  
+  GAIA LLM Validation Metrics: Displays various performance metrics, such as accuracy and response time, using interactive visualizations to help users analyze model performance.
+  
+  GAIA Data Overview: Allows users to explore the GAIA dataset, including metadata, with filtering and search capabilities.
+
+**4.Main Application Mechanism**: 
+  In the GAIA LLM Validation Tool page, We can select the prompts from GAIA Dataset based on different criteria (like levels of the questions or prompts with attachments only etc..) and send the prompt along with it's context (if it has any context or attachment) to openAI API.
+  OpenAI API returns an answer for us to validate, we'll check if the returned answer is matching with the expected answer from the GAIA Dataset (that's displayed in the application), if we find it matching then we'll consider this case as 'ASIS', if not we'll use the Chain of Thought prompting with the annotator data (in editable format to remove the answer).
+  If the answer matches after Chain of Thought prompting then we'll count this case to be 'correct answer with instructions' else it'll be counted as 'Unable to answer'
+
+**4.Intelligence Analytics**:
+  In GAIA LLM Validation Metrics page, we'll display all the recorded data for different categories (ASIS, Correct answer with instructions or Unable to answer) that gives us the capability of the LLM Model in a visual manner.
+  
 
 ## Project Tree:
 ```
-Assignment1/
-├── .devcontainer/
-│   └── devcontainer.json
-├── data_handle/
-│   ├── datatransfer_gcpbucket.py
-│   ├── datatransfer_gcpsql.py
-│   ├── json_csv_gaia.py
-│   ├── main_data_transfer.py
-│   └── source_text_extract.py
-├── GAIA/
-│   └── 2023/
-├── GAIA.py
+.
+├── GAIA
+│   ├── 2023
+│   ├── GAIA.py
+│   └── README.md
+├── GAIA_Benchmark_app
+│   ├── GAIA_Benchmark_LLM.py
+│   ├── pages
+│   └── requirements.txt
 ├── README.md
-├── GAIA_Benchmark_app/
-│   └── pages/
-│       └── GAIA_Benchmark_LLM.py
+├── bigdata-8989-caf46d240143.json
+├── data_handle
+│   ├── datatransfer_gcpbucket.py
+│   ├── datatransfer_gcpsql.py
+│   ├── json_csv_gaia.py
+│   ├── main_data_transfer.py
+│   └── source_text_extract.py
+├── project_structure.txt
 ├── requirements.txt
-├── terraform_IaC/
-│   ├── main.tf
-│   └── variables.tf
-├── venv/
-│   ├── bin/
-│   ├── docx-template/
-│   ├── etc/
-│   ├── include/
-│   ├── lib/
-│   └── share/
-├── .env
-├── .gitignore
-└── bigdata-8989-caf46d240143.json
+├── terraform_IaC
+│   ├── main.tf
+│   └── variables.tf
+└── venv
+    ├── bin
+    ├── docx-template
+    ├── etc
+    ├── include
+    ├── lib
+    ├── pyvenv.cfg
+    └── share
 ```
 
 
