@@ -39,15 +39,25 @@ The solution will not only streamline the process of test case selection and com
 ## Project Tree:
 ```
 Assignment1/
+├── .devcontainer/
+│   └── devcontainer.json
 ├── data_handle/
 │   ├── datatransfer_gcpbucket.py
 │   ├── datatransfer_gcpsql.py
 │   ├── json_csv_gaia.py
+│   ├── main_data_transfer.py
 │   └── source_text_extract.py
 ├── GAIA/
+│   └── 2023/
+├── GAIA.py
+├── README.md
 ├── GAIA_Benchmark_app/
 │   └── pages/
 │       └── GAIA_Benchmark_LLM.py
+├── requirements.txt
+├── terraform_IaC/
+│   ├── main.tf
+│   └── variables.tf
 ├── venv/
 │   ├── bin/
 │   ├── docx-template/
@@ -57,11 +67,7 @@ Assignment1/
 │   └── share/
 ├── .env
 ├── .gitignore
-├── bigdata-8989-caf46d240143.json
-├── main_data_transfer.py
-├── README.md
-├── requirements.txt
-└── setup.sh
+└── bigdata-8989-caf46d240143.json
 ```
 
 
@@ -87,16 +93,23 @@ DB_PASSWORD="your DB password"
 ```
 
 4. Clone GAIA Data repo to the root directory location.
-
+```
+git lfs install
+```
+```
+# When prompted for a password, use an access token with write permissions.
+# Generate one from your settings: https://huggingface.co/settings/tokens
+git clone https://huggingface.co/datasets/gaia-benchmark/GAIA
+```
 5. Open Terminal at root directory and run the below commands in the given order:
 ```
 pip install requirements.txt
 ```
 ```
+cd data_handle
+```
+```
 python3 main_data_transfer.py
-```
-```
-cd GAIA_Benchmark_app
 ```
 ```
 streamlit run GAIA_Benchmark_LLM.py
