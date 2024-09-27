@@ -96,7 +96,7 @@ pip install requirements.txt
 python3 main_data_transfer.py
 ```
 ```
-python3 GAIA_Benchmark_LLM.py
+streamlit run GAIA_Benchmark_LLM.py
 ```
 
 6. Application Starts running in your local for you to validate!
