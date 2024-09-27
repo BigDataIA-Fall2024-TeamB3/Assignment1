@@ -14,21 +14,21 @@ Contribution:
 - b. Snehal Shivaji Molavade: 33%
 - c. Sai Vivekanand Reddy Vangala: 33%
 
-## Individual Contributions
+### Individual Contributions
  
 This project was completed as a team effort over two weeks, with each member focusing on specific tasks to ensure successful completion. Below are the individual contributions:
  
-### Viswanath Raju Indukuri
+#### Viswanath Raju Indukuri
 - **Streamlit Pages Design and Validation Tool:** Developed and designed the Streamlit application pages, including the implementation of the validation tool. *(2 days)*
 - **Terraform Infrastructure as Code (IaC):** Created and configured Terraform scripts for infrastructure provisioning and management. *(1 day)*
 - **OpenAI API Integration:** Integrated OpenAI's API into the validation tool for automated responses and evaluation. *(1 day)*
  
-### Snehal Shivaji Molavade
+#### Snehal Shivaji Molavade
 - **GCP Cloud Storage and PostgreSQL Setup:** Set up Google Cloud Storage and Cloud PostgreSQL, including data storage and retrieval configurations. *(1 day)*
 - **Codelab Documentation:** Created comprehensive documentation for the project, detailing steps for setup, deployment, and usage. *(1 day)*
 - **Source File Context Extraction and Integration:** Extracted context from source files into text format and integrated it with the validation tool in Streamlit. *(2 days)*
  
-### Sai Vivekanand Reddy Vangala
+#### Sai Vivekanand Reddy Vangala
 - **GCloud SQL Setup:** Configured Google Cloud SQL instances for database management and data handling. *(1 day)*
 - **Data Handling:** Managed data preparation, transformation, and integration into the project workflow. *(1 day)*
 - **Streamlit Metrics Page:** Developed the metrics page in Streamlit to visualize and evaluate validation results. *(2 days)*
