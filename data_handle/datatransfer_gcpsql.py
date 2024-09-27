@@ -1,3 +1,4 @@
+from google.cloud import storage
 from dotenv import load_dotenv
 import os
 import pandas as pd
@@ -14,8 +15,36 @@ DB_NAME = os.getenv('DB_NAME')
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = os.getenv('DB_PORT', '5432')
 
-# CSV file path
-CSV_FILE_PATH = 'GAIA/2023/validation/metadata.csv'
+# GCP bucket and file path
+BUCKET_NAME = 'gaia_files'
+GCP_FILE_PATH = 'metadata.csv'
+LOCAL_TMP_FILE_PATH = '/tmp/metadata.csv'
+
+# Function to download file from GCP bucket to local /tmp directory
+def download_file_from_gcs(bucket_name, gcp_file_path, local_file_path):
+    try:
+        # Initialize a storage client
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(gcp_file_path)
+
+        # Download the file
+        blob.download_to_filename(local_file_path)
+        print(f"File downloaded from GCS bucket '{bucket_name}' to '{local_file_path}'.")
+    except Exception as e:
+        print(f"Error downloading file from GCS: {e}")
+        exit(1)
+
+# Download the file from GCS
+download_file_from_gcs(BUCKET_NAME, GCP_FILE_PATH, LOCAL_TMP_FILE_PATH)
+
+# Read the CSV file into a DataFrame
+try:
+    df = pd.read_csv(LOCAL_TMP_FILE_PATH)
+    print("CSV file loaded into DataFrame successfully.")
+except Exception as e:
+    print(f"Error reading CSV file: {e}")
+    exit(1)
 
 # Create the connection to the PostgreSQL database
 try:
@@ -31,9 +60,6 @@ try:
 except Exception as e:
     print(f"Error connecting to the database: {e}")
     exit(1)
-
-# Read the CSV file into a DataFrame
-df = pd.read_csv(CSV_FILE_PATH)
 
 # Define the table name
 TABLE_NAME = 'validation'
