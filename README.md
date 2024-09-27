@@ -30,11 +30,13 @@ The solution will not only streamline the process of test case selection and com
 The GAIA Benchmark LLM Evaluation Tool integrates several components, including data preprocessing, infrastructure setup using Terraform, and a multi-page Streamlit application. The workflow is organized into multiple steps:
 
 **1.Infrastructure Setup Using Terraform**:
+  
   Cloud SQL Setup: Terraform is used to automate the setup of a PostgreSQL instance in Google Cloud SQL. This involves defining necessary resources and optimizing settings for performance and cost.
   
   Google Cloud Storage (GCS) Setup: Creates a GCS bucket using Terraform for storing datasets and configuration files.
 
 **2.Data Handling and Preprocessing**:
+  
   JSON to CSV Conversion: Converts Metadata in GCloud Bucket from a JSON format to CSV to simplify data ingestion. This ensures integrity and consistency during the data transformation process.
   
   Data Transfer from Bucket to GCP Cloud SQL: Uses Python libraries (e.g., psycopg2) to connect and upload the Metadata CSV data to Cloud SQL. It includes error handling to manage issues during the connection and upload processes.
@@ -53,7 +55,9 @@ The GAIA Benchmark LLM Evaluation Tool integrates several components, including 
 **4.Main Application Mechanism**: 
   
   In the GAIA LLM Validation Tool page, We can select the prompts from GAIA Dataset based on different criteria (like levels of the questions or prompts with attachments only etc..) and send the prompt along with it's context (if it has any context or attachment) to openAI API.
+  
   OpenAI API returns an answer for us to validate, we'll check if the returned answer is matching with the expected answer from the GAIA Dataset (that's displayed in the application), if we find it matching then we'll consider this case as 'ASIS', if not we'll use the Chain of Thought prompting with the annotator data (in editable format to remove the answer).
+  
   If the answer matches after Chain of Thought prompting then we'll count this case to be 'correct answer with instructions' else it'll be counted as 'Unable to answer'
 
 **4.Intelligence Analytics**:
@@ -80,7 +84,6 @@ The GAIA Benchmark LLM Evaluation Tool integrates several components, including 
 │   ├── json_csv_gaia.py
 │   ├── main_data_transfer.py
 │   └── source_text_extract.py
-├── project_structure.txt
 ├── requirements.txt
 ├── terraform_IaC
 │   ├── main.tf
