@@ -42,11 +42,13 @@ The GAIA Benchmark LLM Evaluation Tool integrates several components, including 
   Data Handling for Context of Prompts: After creating a metadata table in GCloud SQL, we select the files related to prompts (context) from the bucket and process them into text, add them as a new column in our table.
 
 **3.Streamlit Application Pages**:
+  
   GAIA LLM Validation Tool: Provides an interactive UI for users to select test cases, generate model responses, and provide feedback. It enables users to refine and re-evaluate model outputs.
   
   GAIA LLM Validation Metrics: Displays various performance metrics, such as accuracy and response time, using interactive visualizations to help users analyze model performance.
   
   GAIA Data Overview: Allows users to explore the GAIA dataset, including metadata, with filtering and search capabilities.
+
 
 **4.Main Application Mechanism**: 
   
