@@ -49,11 +49,13 @@ The GAIA Benchmark LLM Evaluation Tool integrates several components, including 
   GAIA Data Overview: Allows users to explore the GAIA dataset, including metadata, with filtering and search capabilities.
 
 **4.Main Application Mechanism**: 
+  
   In the GAIA LLM Validation Tool page, We can select the prompts from GAIA Dataset based on different criteria (like levels of the questions or prompts with attachments only etc..) and send the prompt along with it's context (if it has any context or attachment) to openAI API.
   OpenAI API returns an answer for us to validate, we'll check if the returned answer is matching with the expected answer from the GAIA Dataset (that's displayed in the application), if we find it matching then we'll consider this case as 'ASIS', if not we'll use the Chain of Thought prompting with the annotator data (in editable format to remove the answer).
   If the answer matches after Chain of Thought prompting then we'll count this case to be 'correct answer with instructions' else it'll be counted as 'Unable to answer'
 
 **4.Intelligence Analytics**:
+  
   In GAIA LLM Validation Metrics page, we'll display all the recorded data for different categories (ASIS, Correct answer with instructions or Unable to answer) that gives us the capability of the LLM Model in a visual manner.
   
 
