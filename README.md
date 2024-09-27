@@ -40,6 +40,8 @@ This project has built a model evaluation tool using Streamlit to assess OpenAI 
 
 Documenatation - https://codelabs-preview.appspot.com/?file_id=1oVTbU2Amu7eV3ubZ5p0GjSx5g8veuKaBHyUCSX16VVU#0
 
+Demo Video Link - https://drive.google.com/file/d/1axG7Z76Vs4rHdScOzYcp5q5SmD0Zu0IF/view?usp=sharing
+
 ## Architecture:
 ![gaia_benchmark_llm_evaluation_tool](https://github.com/user-attachments/assets/cf7d4c65-dfa2-461e-8a19-8c7780d6f3f1)
 
