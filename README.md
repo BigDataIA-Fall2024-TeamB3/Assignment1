@@ -49,10 +49,10 @@ Demo Video Link - https://drive.google.com/file/d/1axG7Z76Vs4rHdScOzYcp5q5SmD0Zu
 The problem revolves around developing a seamless, efficient, and user-focused evaluation tool for comparing OpenAI model outputs against predefined validation test cases. The tool must enable user interactions for refining inputs and capturing feedback, which ultimately enhances the model's performance while maintaining an intuitive user experience.
 
 ### Scope:
-The evaluation tool should be capable of handling large datasets and automating data transfer processes, specifically from Hugging Face to a Google Cloud Platform (GCP) environment. Streamlit will serve as the primary user interface, allowing users to select test cases, compare outputs with ground truth data, and modify metadata annotations. This interaction will facilitate iterative evaluations, helping improve the accuracy and efficiency of AI models while providing clear, actionable insights through detailed reports and visualizations.
+Streamlit will serve as the primary user interface, allowing users to select test cases, compare outputs with ground truth data, and modify metadata annotations. This interaction will facilitate iterative evaluations, helping improve the accuracy and efficiency of AI models while providing clear, actionable insights through detailed reports and visualizations.
 
 ### Outcomes:
-The solution will not only streamline the process of test case selection and comparison but also ensure seamless data integration. This will enable users to refine and process data more effectively, capturing and visualizing feedback accurately. By incorporating visual reports, the tool provides a comprehensive understanding of model performance.
+The solution will enable us to evaluate the LLM Model using the GAIA Dataset in multiple steps, using Chain of Thought Prompting if needed. It will also visualise the analysis of results (in multiple categories like ASIS, Correctly answered with instruction and Unable to Answer) of all the prompts from GAIA Dataset to make the end user easily understand the capability of Validated Model.
 
 ## Application Workflow:
 The GAIA Benchmark LLM Evaluation Tool integrates several components, including data preprocessing, infrastructure setup using Terraform, and a multi-page Streamlit application. The workflow is organized into multiple steps:
