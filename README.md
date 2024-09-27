@@ -88,12 +88,15 @@ DB_PASSWORD="your DB password"
 
 4. Clone GAIA Data repo to the root directory location.
 
-5. Open Terminal at root directory and run:
+5. Open Terminal at root directory and run the below commands in the given order:
 ```
 pip install requirements.txt
 ```
 ```
 python3 main_data_transfer.py
+```
+```
+cd GAIA_Benchmark_app
 ```
 ```
 streamlit run GAIA_Benchmark_LLM.py
