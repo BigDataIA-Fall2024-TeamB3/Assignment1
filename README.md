@@ -60,7 +60,7 @@ The GAIA Benchmark LLM Evaluation Tool integrates several components, including 
   
   If the answer matches after Chain of Thought prompting then we'll count this case to be 'correct answer with instructions' else it'll be counted as 'Unable to answer'
 
-**4.Intelligence Analytics**:
+**5.Intelligence Analytics**:
   
   In GAIA LLM Validation Metrics page, we'll display all the recorded data for different categories (ASIS, Correct answer with instructions or Unable to answer) that gives us the capability of the LLM Model in a visual manner.
   
